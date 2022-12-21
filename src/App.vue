@@ -1,37 +1,76 @@
+<script>
+import { ref } from "vue";
+export default {
+  setup() {
+    let modalView = ref(false);
+    const newNote = ref("");
+    let notes = ref([]);
+
+    let showModal = () => {
+      modalView.value = !modalView.value;
+    };
+
+    function getRandomColor() {
+      let number = Math.floor(Math.random() * 360);
+      let randomColor = "hsl(" + number + " , 100%, 75%)";
+      return randomColor;
+    }
+
+    const addNote = () => {
+      const date = new Date();
+      notes.value.push({
+        id: Math.floor(Math.random() * 1000000),
+        text: newNote.value,
+        date: date.toLocaleString(),
+        backgroundColor: getRandomColor(),
+      });
+      newNote.value = "";
+      modalView.value = false;
+    };
+
+    /* function deleteNote(currentId) {
+      console.log(notes);
+      notes = notes.filter((element) => element.id !== currentId);
+    }*/
+
+    return { modalView, newNote, showModal, notes, addNote };
+  },
+};
+</script>
+
 <template>
   <main>
-    <!--<div class="overlay">
+    <div class="overlay" v-if="modalView">
       <div class="modal">
         <textarea
+          v-model="newNote"
           class="modal__textarea"
           name="note"
           id="note"
           cols="30"
           rows="10"
         ></textarea>
-        <button class="modal__btn">Add Note</button>
-        <button class="modal__btn-close">X</button>
+        <button class="modal__btn" @click="addNote">Add Note</button>
+        <button class="modal__btn-close" @click="showModal">X</button>
       </div>
-    </div>-->
+    </div>
     <div class="container">
       <header>
         <h1>Notes</h1>
-        <button class="add-btn">+</button>
+        <button class="add-btn" @click="showModal">+</button>
       </header>
       <div class="container__cards">
-        <div class="card">
+        <div
+          class="card"
+          v-for="note in notes"
+          :key="note.id"
+          :style="{ backgroundColor: note.backgroundColor }"
+        >
+          <button class="card__btn-delete">X</button>
           <p class="card__text">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ea nisi
-            ullam dolores labore quis perspiciatis?
+            {{ note.text }}
           </p>
-          <p class="card__date">21/12/2022</p>
-        </div>
-        <div class="card">
-          <p class="card__text">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ea nisi
-            ullam dolores labore quis perspiciatis?
-          </p>
-          <p class="card__date">21/12/2022</p>
+          <p class="card__date">{{ note.date }}</p>
         </div>
       </div>
     </div>
@@ -39,32 +78,66 @@
 </template>
 
 <style scoped>
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
 main {
   height: 100vh;
   width: 100vw;
+  background-image: repeating-linear-gradient(
+      transparent 0 20px,
+      rgba(0, 0, 50, 0.1) 20px 21px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 20px,
+      rgba(0, 0, 50, 0.1) 20px 21px
+    );
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100vw;
+  min-height: 20vh;
+  padding-left: 10vw;
+  padding-right: 10vw;
+  background-image: linear-gradient(
+    rgb(195, 195, 203),
+    rgba(195, 195, 203, 0.5)
+  );
+  box-shadow: 0px 3px 4px rgb(2, 18, 84);
+  margin-bottom: 4rem;
 }
 h1 {
   font-weight: bold;
-  margin-bottom: 1.5rem;
   font-size: 4rem;
   font-family: sans-serif;
+  color: rgb(2, 18, 84);
+}
+.container {
+  width: 100vw;
 }
 .add-btn {
-  border: none;
+  border: 2px solid rgb(2, 18, 84);
   padding: 0.63rem;
-  width: 3.1rem;
-  height: 3.1rem;
+  width: 3.3rem;
+  height: 3.3rem;
   cursor: pointer;
-  background-color: rgb(21, 20, 20);
+  background-color: white;
   border-radius: 100%;
-  color: white;
+  color: hsl(43, 74%, 39%);
   font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: inset 0px 0px 10px 3px rgb(2, 18, 84);
+}
+.add-btn:hover {
+  background-color: rgb(2, 18, 84);
+  color: white;
+  border: 2px solid goldenrod;
+  box-shadow: inset 0px 0px 10px 3px white;
 }
 .overlay {
   position: absolute;
@@ -76,30 +149,33 @@ h1 {
   align-items: center;
   justify-content: center;
 }
-.container {
-  max-width: 62.5rem;
-  padding: 0.6rem;
-  margin: 0 auto;
-}
+
 .container__cards {
   display: flex;
   flex-wrap: wrap;
+  padding-right: 9.8vw;
+  padding-left: 9.8vw;
 }
 .card {
   width: 14rem;
   height: 14rem;
   background-color: rgb(237, 182, 44);
   padding: 0.6rem;
-  border-radius: 0.6rem;
+  border-radius: 0.8rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   margin-right: 2rem;
   margin-bottom: 1.3rem;
+  position: relative;
+  box-shadow: 2px 2px 2px 2px rgb(188, 188, 188);
 }
-
+.card__text {
+  padding: 1.8rem 0.6rem;
+}
 .card__date {
   font-size: 0.7rem;
+  text-align: right;
 }
 
 .modal {
@@ -114,29 +190,37 @@ h1 {
 .modal__btn {
   padding: 0.6rem 1.3rem;
   font-size: 1.3rem;
-  width: 100%;
+  width: 50%;
   background-color: hsl(189, 100%, 40%);
   color: white;
   cursor: pointer;
   margin-top: 1rem;
   border: none;
-  border-radius: 0.4rem;
+  border-radius: 10rem;
+  align-self: center;
 }
 
-.modal__btn-close {
+.modal__btn-close,
+.card__btn-delete {
   position: absolute;
   top: 0;
   right: 0;
   width: 1.7rem;
   height: 1.7rem;
-  background: red;
+  background: rgb(182, 1, 1);
   border: none;
   color: white;
   border-radius: 1rem;
 }
+.card__btn-delete {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
 .modal__textarea {
   box-shadow: 2px 2px 2px 2px hsl(189, 100%, 40%);
   border: 0.5px solid rgb(0, 217, 255);
   border-radius: 0.4rem;
+  padding: 1rem;
 }
 </style>
