@@ -5,6 +5,7 @@ export default {
     let modalView = ref(false);
     const newNote = ref("");
     let notes = ref([]);
+    const errorMessage = ref("");
 
     let showModal = () => {
       modalView.value = !modalView.value;
@@ -17,6 +18,10 @@ export default {
     }
 
     const addNote = () => {
+      if (newNote.value.length < 6) {
+        return (errorMessage.value =
+          "A note needs to have at least 6 characters");
+      }
       const date = new Date();
       notes.value.push({
         id: Math.floor(Math.random() * 1000000),
@@ -26,6 +31,7 @@ export default {
       });
       newNote.value = "";
       modalView.value = false;
+      errorMessage = "";
     };
 
     /* function deleteNote(currentId) {
@@ -33,7 +39,7 @@ export default {
       notes = notes.filter((element) => element.id !== currentId);
     }*/
 
-    return { modalView, newNote, showModal, notes, addNote };
+    return { modalView, newNote, showModal, notes, addNote, errorMessage };
   },
 };
 </script>
@@ -43,13 +49,14 @@ export default {
     <div class="overlay" v-if="modalView">
       <div class="modal">
         <textarea
-          v-model="newNote"
+          v-model.trim="newNote"
           class="modal__textarea"
           name="note"
           id="note"
           cols="30"
           rows="10"
         ></textarea>
+        <p class="modal__error" v-if="errorMessage">{{ errorMessage }}</p>
         <button class="modal__btn" @click="addNote">Add Note</button>
         <button class="modal__btn-close" @click="showModal">X</button>
       </div>
@@ -180,12 +187,12 @@ h1 {
 
 .modal {
   width: 47rem;
-  background-color: rgb(255, 255, 255);
   border-radius: 0.6rem;
   padding: 1.8rem;
   position: relative;
   display: flex;
   flex-direction: column;
+  background-color: rgba(0, 0, 40, 0.1);
 }
 .modal__btn {
   padding: 0.6rem 1.3rem;
@@ -222,5 +229,9 @@ h1 {
   border: 0.5px solid rgb(0, 217, 255);
   border-radius: 0.4rem;
   padding: 1rem;
+}
+.modal__error {
+  margin-top: 0.5rem;
+  color: rgb(182, 1, 1);
 }
 </style>
