@@ -3,9 +3,9 @@ import { ref } from "vue";
 export default {
   setup() {
     let modalView = ref(false);
-    const newNote = ref("");
+    let newNote = ref("");
     let notes = ref([]);
-    const errorMessage = ref("");
+    let errorMessage = ref("");
 
     let showModal = () => {
       modalView.value = !modalView.value;
@@ -34,12 +34,19 @@ export default {
       errorMessage = "";
     };
 
-    /* function deleteNote(currentId) {
-      console.log(notes);
-      notes = notes.filter((element) => element.id !== currentId);
-    }*/
+    const deleteNote = (currentId) => {
+      notes.value = notes.value.filter((element) => element.id !== currentId);
+    };
 
-    return { modalView, newNote, showModal, notes, addNote, errorMessage };
+    return {
+      modalView,
+      newNote,
+      showModal,
+      notes,
+      addNote,
+      errorMessage,
+      deleteNote,
+    };
   },
 };
 </script>
@@ -73,7 +80,9 @@ export default {
           :key="note.id"
           :style="{ backgroundColor: note.backgroundColor }"
         >
-          <button class="card__btn-delete">X</button>
+          <button class="card__btn-delete" @click="deleteNote(note.id)">
+            X
+          </button>
           <p class="card__text">
             {{ note.text }}
           </p>
